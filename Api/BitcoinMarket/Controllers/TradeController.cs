@@ -1,5 +1,6 @@
 ﻿using BitcoinMarket.Data;
 using BitcoinMarket.Repositories.Interfaces;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -11,6 +12,7 @@ namespace BitcoinMarket.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [EnableCors("CorsPolicy")]
     public class TradeController : ControllerBase
     {
         public TradeController(ITradeRepository tradeRepository)
@@ -43,7 +45,7 @@ namespace BitcoinMarket.Controllers
             return Ok(latestOffers);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("get/{id}")]
         public async Task<IActionResult> GetTrade(int id)
         {
             var gottenTrade = await _tradeRepository.GetTradeById(id);

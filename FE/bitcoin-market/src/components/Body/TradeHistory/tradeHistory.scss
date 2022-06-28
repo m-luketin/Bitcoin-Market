@@ -1,0 +1,28 @@
+.trade-history {
+	width: 30%;
+
+	.trade-history-header {
+		display: flex;
+		justify-content: space-between;
+		width: 100%;
+		background-color: var(--bitcoin-orange);
+		font-weight: bold;
+		font-size: 1.4rem;
+		padding: 8px 0;
+		border-radius: 4px;
+		box-shadow: 0px 2px var(--off-black);
+
+		.trade-history-header-item {
+			width: 25%;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			text-align: center;
+		}
+	}
+
+	.trade-history-container {
+		overflow-y: scroll;
+		max-height: calc(50vh);
+	}
+}

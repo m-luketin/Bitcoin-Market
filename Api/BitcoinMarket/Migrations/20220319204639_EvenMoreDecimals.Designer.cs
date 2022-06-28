@@ -4,14 +4,16 @@ using BitcoinMarket.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BitcoinMarket.Migrations
 {
     [DbContext(typeof(BitcoinMarketDbContext))]
-    partial class BitcoinMarketDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220319204639_EvenMoreDecimals")]
+    partial class EvenMoreDecimals
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

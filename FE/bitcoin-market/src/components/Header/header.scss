@@ -1,0 +1,55 @@
+.header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 10px 20px;
+	background-color: var(--bitcoin-orange--opaque);
+	border-bottom: 1px solid black;
+
+	.header-image-container {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.header-title {
+		font-size: 32px;
+		margin: 0px 10px;
+	}
+
+	.header-button-container {
+		display: flex;
+		justify-content: flex-end;
+
+		.header-button {
+			width: 100px;
+			padding: 5px;
+		}
+
+		.register-button {
+			margin: 0 0 0 20px;
+		}
+	}
+
+	@media (max-width: 768px) {
+		padding: 10px;
+
+		.header-title {
+			font-size: 18px;
+		}
+
+		.header-button-container {
+			flex-direction: column;
+			align-items: flex-end;
+
+			.header-button {
+				width: 75px;
+				padding: 2px;
+
+				&.register-button {
+					margin: 10px 0 0 0;
+				}
+			}
+		}
+	}
+}

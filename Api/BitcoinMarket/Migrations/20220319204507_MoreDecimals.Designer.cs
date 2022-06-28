@@ -4,14 +4,16 @@ using BitcoinMarket.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BitcoinMarket.Migrations
 {
     [DbContext(typeof(BitcoinMarketDbContext))]
-    partial class BitcoinMarketDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220319204507_MoreDecimals")]
+    partial class MoreDecimals
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -42,8 +44,8 @@ namespace BitcoinMarket.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("ValueInBtc")
-                        .HasPrecision(20, 10)
-                        .HasColumnType("decimal(20,10)");
+                        .HasPrecision(12, 6)
+                        .HasColumnType("decimal(12,6)");
 
                     b.Property<decimal>("ValueInUsd")
                         .HasColumnType("decimal(12,2)");
@@ -65,8 +67,8 @@ namespace BitcoinMarket.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<decimal>("BtcBalance")
-                        .HasPrecision(20, 10)
-                        .HasColumnType("decimal(20,10)");
+                        .HasPrecision(12, 6)
+                        .HasColumnType("decimal(12,6)");
 
                     b.Property<string>("Password")
                         .HasColumnType("nvarchar(max)");

@@ -1,5 +1,6 @@
 ﻿using BitcoinMarket.Data;
 using BitcoinMarket.Repositories.Interfaces;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -11,6 +12,8 @@ namespace BitcoinMarket.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [EnableCors("CorsPolicy")]
+
     public class UserController : ControllerBase
     {
         public UserController(IUserRepository userRepository)
@@ -20,7 +23,7 @@ namespace BitcoinMarket.Controllers
         private readonly IUserRepository _userRepository;
 
 
-        [HttpGet("id/{id}")]
+        [HttpGet("get/{id}")]
         public async Task<IActionResult> GetUserById(int id)
         {
             var gottenUser = await _userRepository.GetUserById(id);
