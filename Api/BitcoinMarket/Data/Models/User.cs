@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BitcoinMarket.Data.Models;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -18,10 +19,6 @@ namespace BitcoinMarket.Data
         [Column(TypeName = "decimal(12,4)")]
         public decimal BtcBalance { get; set; }
 
-        [InverseProperty("Seller")]
-        public ICollection<Trade> SellerTrades { get; set; }
-
-        [InverseProperty("Buyer")]
-        public ICollection<Trade> BuyerTrades { get; set; }
+        public ICollection<Trade> Trades { get; set; }
     }
 }

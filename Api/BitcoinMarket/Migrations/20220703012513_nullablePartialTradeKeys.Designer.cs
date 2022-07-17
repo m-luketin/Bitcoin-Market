@@ -4,14 +4,16 @@ using BitcoinMarket.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BitcoinMarket.Migrations
 {
     [DbContext(typeof(BitcoinMarketDbContext))]
-    partial class BitcoinMarketDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220703012513_nullablePartialTradeKeys")]
+    partial class nullablePartialTradeKeys
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -60,7 +62,7 @@ namespace BitcoinMarket.Migrations
                     b.Property<DateTime?>("TransactionFinished")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("TransactionOwnerId")
+                    b.Property<int>("TransactionOwnerId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("TransactionStarted")
@@ -130,7 +132,8 @@ namespace BitcoinMarket.Migrations
                     b.HasOne("BitcoinMarket.Data.User", "TransactionOwner")
                         .WithMany("Trades")
                         .HasForeignKey("TransactionOwnerId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("TransactionOwner");
                 });

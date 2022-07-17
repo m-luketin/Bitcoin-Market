@@ -4,14 +4,16 @@ using BitcoinMarket.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BitcoinMarket.Migrations
 {
     [DbContext(typeof(BitcoinMarketDbContext))]
-    partial class BitcoinMarketDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220701185857_BrutalRefactor")]
+    partial class BrutalRefactor
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -26,10 +28,10 @@ namespace BitcoinMarket.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("BuyTradeId")
+                    b.Property<int>("BuyTradeId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("SellTradeId")
+                    b.Property<int>("SellTradeId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("Value")
@@ -113,12 +115,14 @@ namespace BitcoinMarket.Migrations
                     b.HasOne("BitcoinMarket.Data.Trade", "BuyTrade")
                         .WithMany("PartialBuyTrades")
                         .HasForeignKey("BuyTradeId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.HasOne("BitcoinMarket.Data.Trade", "SellTrade")
                         .WithMany("PartialSellTrades")
                         .HasForeignKey("SellTradeId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.Navigation("BuyTrade");
 
@@ -130,7 +134,7 @@ namespace BitcoinMarket.Migrations
                     b.HasOne("BitcoinMarket.Data.User", "TransactionOwner")
                         .WithMany("Trades")
                         .HasForeignKey("TransactionOwnerId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("TransactionOwner");
                 });

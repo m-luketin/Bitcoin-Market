@@ -27,12 +27,6 @@ namespace BitcoinMarket.Repositories.Implementations
             return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
         }
 
-        public async Task<BuyerSeller> GetUsersByTradeId(int tradeId)
-        {
-            var trade = await _context.Trades.FindAsync(tradeId);
-            return new BuyerSeller(trade.Buyer, trade.Seller);
-        }
-
         public async Task<bool> Login(string username, string password)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username & u.Password == password);
@@ -42,11 +36,24 @@ namespace BitcoinMarket.Repositories.Implementations
             return true;
         }
 
-        public async Task<bool> Register(User userToAdd)
-        {
+        public async Task<bool> Register(string username, string password)
+        { 
+            var userToAdd = new User { Username = username, Password = password };
             await _context.Users.AddAsync(userToAdd);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<string> SetUserBalance(int userId, decimal usdBalance, decimal btcBalance)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+                return "User not found";
+
+            user.UsdBalance = usdBalance;
+            user.BtcBalance = btcBalance;
+            await _context.SaveChangesAsync();
+            return "";
         }
     }
 }

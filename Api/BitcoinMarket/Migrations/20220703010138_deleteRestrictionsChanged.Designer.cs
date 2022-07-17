@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BitcoinMarket.Migrations
 {
     [DbContext(typeof(BitcoinMarketDbContext))]
-    [Migration("20220319204507_MoreDecimals")]
-    partial class MoreDecimals
+    [Migration("20220703010138_deleteRestrictionsChanged")]
+    partial class deleteRestrictionsChanged
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -21,6 +21,31 @@ namespace BitcoinMarket.Migrations
                 .HasAnnotation("ProductVersion", "5.0.15")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+            modelBuilder.Entity("BitcoinMarket.Data.Models.PartialTrade", b =>
+                {
+                    b.Property<int>("PartialTradeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("BuyTradeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SellTradeId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Value")
+                        .HasColumnType("decimal(12,4)");
+
+                    b.HasKey("PartialTradeId");
+
+                    b.HasIndex("BuyTradeId");
+
+                    b.HasIndex("SellTradeId");
+
+                    b.ToTable("PartialTrades");
+                });
+
             modelBuilder.Entity("BitcoinMarket.Data.Trade", b =>
                 {
                     b.Property<int>("Id")
@@ -28,14 +53,17 @@ namespace BitcoinMarket.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("BuyerId")
-                        .HasColumnType("int");
+                    b.Property<decimal>("FilledValue")
+                        .HasColumnType("decimal(12,2)");
 
-                    b.Property<int>("SellerId")
-                        .HasColumnType("int");
+                    b.Property<bool>("IsBuy")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime?>("TransactionFinished")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("TransactionOwnerId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("TransactionStarted")
                         .HasColumnType("datetime2");
@@ -44,17 +72,15 @@ namespace BitcoinMarket.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("ValueInBtc")
-                        .HasPrecision(12, 6)
-                        .HasColumnType("decimal(12,6)");
+                        .HasPrecision(20, 10)
+                        .HasColumnType("decimal(20,10)");
 
                     b.Property<decimal>("ValueInUsd")
                         .HasColumnType("decimal(12,2)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BuyerId");
-
-                    b.HasIndex("SellerId");
+                    b.HasIndex("TransactionOwnerId");
 
                     b.ToTable("Trades");
                 });
@@ -67,8 +93,8 @@ namespace BitcoinMarket.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<decimal>("BtcBalance")
-                        .HasPrecision(12, 6)
-                        .HasColumnType("decimal(12,6)");
+                        .HasPrecision(20, 10)
+                        .HasColumnType("decimal(20,10)");
 
                     b.Property<string>("Password")
                         .HasColumnType("nvarchar(max)");
@@ -84,28 +110,43 @@ namespace BitcoinMarket.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("BitcoinMarket.Data.Trade", b =>
+            modelBuilder.Entity("BitcoinMarket.Data.Models.PartialTrade", b =>
                 {
-                    b.HasOne("BitcoinMarket.Data.User", "Buyer")
-                        .WithMany("BuyerTrades")
-                        .HasForeignKey("BuyerId");
-
-                    b.HasOne("BitcoinMarket.Data.User", "Seller")
-                        .WithMany("SellerTrades")
-                        .HasForeignKey("SellerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("BitcoinMarket.Data.Trade", "BuyTrade")
+                        .WithMany("PartialBuyTrades")
+                        .HasForeignKey("BuyTradeId")
                         .IsRequired();
 
-                    b.Navigation("Buyer");
+                    b.HasOne("BitcoinMarket.Data.Trade", "SellTrade")
+                        .WithMany("PartialSellTrades")
+                        .HasForeignKey("SellTradeId")
+                        .IsRequired();
 
-                    b.Navigation("Seller");
+                    b.Navigation("BuyTrade");
+
+                    b.Navigation("SellTrade");
+                });
+
+            modelBuilder.Entity("BitcoinMarket.Data.Trade", b =>
+                {
+                    b.HasOne("BitcoinMarket.Data.User", "TransactionOwner")
+                        .WithMany("Trades")
+                        .HasForeignKey("TransactionOwnerId")
+                        .IsRequired();
+
+                    b.Navigation("TransactionOwner");
+                });
+
+            modelBuilder.Entity("BitcoinMarket.Data.Trade", b =>
+                {
+                    b.Navigation("PartialBuyTrades");
+
+                    b.Navigation("PartialSellTrades");
                 });
 
             modelBuilder.Entity("BitcoinMarket.Data.User", b =>
                 {
-                    b.Navigation("BuyerTrades");
-
-                    b.Navigation("SellerTrades");
+                    b.Navigation("Trades");
                 });
 #pragma warning restore 612, 618
         }

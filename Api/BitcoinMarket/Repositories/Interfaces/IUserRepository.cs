@@ -13,10 +13,11 @@ namespace BitcoinMarket.Repositories.Interfaces
 
         Task<User> GetUserByUsername(string username);
 
-        Task<BuyerSeller> GetUsersByTradeId(int tradeId);         
-
         Task<bool> Login(string username, string password);
 
-        Task<bool> Register(User userToAdd);
+        Task<bool> Register(string username, string password);
+
+        Task<string> SetUserBalance(int userId, decimal usdBalance, decimal btcBalance);
+
     }
 }

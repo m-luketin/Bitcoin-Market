@@ -1,4 +1,5 @@
 ﻿using BitcoinMarket.Data;
+using BitcoinMarket.Data.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,12 +9,15 @@ namespace BitcoinMarket.Repositories.Interfaces
 {
     public interface ITradeRepository
     {
-        Task<bool> AddTrade(Trade tradeToAdd);
+        Task<string> AddTrade(int userId, bool IsBuy, int type, decimal tradeValue, decimal limitValue);
         Task<Trade> GetTradeById(int id);
-        Task<List<Trade>> GetAllTradesByUserId(int userId);
-        Task<List<Trade>> GetSellTradesByUserId(int userId);
-        Task<List<Trade>> GetBuyTradesByUserId(int userId);
+        Task<List<Trade>> GetActiveTradesByUserId(int userId, int page, int pageSize);
+        Task<List<Trade>> GetFinishedTradesByUserId(int userId, int page, int pageSize);
         Task<List<Trade>> GetLatestTrades(int page, int pageSize);
-        Task<List<Trade>> GetLatestOffers(int page, int pageSize);
+        Task<List<Trade>> GetLatestSells(int page, int pageSize);
+        Task<List<Trade>> GetLatestBuys(int page, int pageSize);
+        Task<List<ChartPoint>> AggregateChartData();
+        Task<string> RemoveTrade(int userId, int tradeId);
+
     }
 }

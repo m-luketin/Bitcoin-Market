@@ -1,11 +1,15 @@
 ﻿using BitcoinMarket.Data;
+using BitcoinMarket.Data.Enums;
 using BitcoinMarket.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace BitcoinMarket.Controllers
@@ -21,14 +25,45 @@ namespace BitcoinMarket.Controllers
         }
         private readonly ITradeRepository _tradeRepository;
 
+        [Authorize]
         [HttpPost("add")]
-        public async Task<IActionResult> AddTrade(Trade tradeToAdd)
+        public async Task<IActionResult> AddTrade([FromBody] JObject data)
         {
-            var wasAddSuccessful = await _tradeRepository.AddTrade(tradeToAdd);
-            if (wasAddSuccessful)
-                return Ok();
+            var errorMessage = ""; var limitValue = 0.0m;
+            var claimsIdentity = User.Identity as ClaimsIdentity;
+            errorMessage = int.TryParse(claimsIdentity.FindFirst(ClaimTypes.Name)?.Value, out var userId) ? errorMessage : "Not logged in";
 
-            return StatusCode(422);
+            errorMessage = int.TryParse(data["type"]?.ToString(), out var type) ? errorMessage : "Trade type not valid";
+            errorMessage = decimal.TryParse(data["tradeValue"]?.ToString(), out var tradeValue) && tradeValue > 0 ? errorMessage : "Trade value not valid";
+            errorMessage = bool.TryParse(data["isBuy"]?.ToString(), out var isBuy) ? errorMessage : "IsBuy argument not valid";
+            if ((TradeType)type == (TradeType.LimitOrder))
+                errorMessage = decimal.TryParse(data["limitValue"]?.ToString(), out limitValue) && limitValue > 0 ? errorMessage : "Limit value not valid";
+
+            var addTradeErrorMessage = await _tradeRepository.AddTrade(userId, isBuy, type, tradeValue, limitValue);
+            errorMessage = addTradeErrorMessage.Length <= 0 ? errorMessage : addTradeErrorMessage;
+
+            if (errorMessage.Length > 0)
+                return BadRequest(errorMessage);
+
+            return Ok();
+        }
+
+        [Authorize]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteTrade(int tradeId)
+        {
+            var errorMessage = "";;
+            var claimsIdentity = User.Identity as ClaimsIdentity;
+            errorMessage = int.TryParse(claimsIdentity.FindFirst(ClaimTypes.Name)?.Value, out var userId) ? errorMessage : "Not logged in";
+
+
+            var deleteTradeErrorMessage = await _tradeRepository.RemoveTrade(userId, tradeId);
+            errorMessage = deleteTradeErrorMessage.Length <= 0 ? errorMessage : deleteTradeErrorMessage;
+
+            if (errorMessage.Length > 0)
+                return BadRequest(errorMessage);
+
+            return Ok();
         }
 
         [HttpGet("latest")]
@@ -38,10 +73,18 @@ namespace BitcoinMarket.Controllers
             return Ok(latestTrades);
         }
 
-        [HttpGet("offers")]
-        public async Task<IActionResult> GetLatestOffers(int page, int pageSize)
+        [HttpGet("sales")]
+        public async Task<IActionResult> GetLatestSells(int page, int pageSize)
         {
-            var latestOffers = await _tradeRepository.GetLatestOffers(page, pageSize);
+            var latestOffers = await _tradeRepository.GetLatestSells(page, pageSize);
+            return Ok(latestOffers);
+        }
+
+
+        [HttpGet("buys")]
+        public async Task<IActionResult> GetLatestBuys(int page, int pageSize)
+        {
+            var latestOffers = await _tradeRepository.GetLatestBuys(page, pageSize);
             return Ok(latestOffers);
         }
 
@@ -56,25 +99,39 @@ namespace BitcoinMarket.Controllers
             return NotFound();
         }
 
-        [HttpGet("user-trades")]
-        public async Task<IActionResult> GetAllTradesByUserId(int userId)
+        [Authorize]
+        [HttpGet("finished-trades")]
+        public async Task<IActionResult> GetActiveUserTrades(int page, int pageSize)
         {
-            var trades = await _tradeRepository.GetAllTradesByUserId(userId);
+            var claimsIdentity = User.Identity as ClaimsIdentity;
+            var errorMessage = int.TryParse(claimsIdentity.FindFirst(ClaimTypes.Name)?.Value, out var userId) ? "" : "Not logged in";
+
+            if (errorMessage.Length > 0)
+                return BadRequest(errorMessage);
+
+            var trades = await _tradeRepository.GetActiveTradesByUserId(userId, page, pageSize);
             return Ok(trades);
         }
 
-        [HttpGet("user-sales")]
-        public async Task<IActionResult> GetAllSalesByUserId(int userId)
+        [Authorize]
+        [HttpGet("active-trades")]
+        public async Task<IActionResult> GetFinishedTradesByUserId(int page, int pageSize)
         {
-            var trades = await _tradeRepository.GetSellTradesByUserId(userId);
+            var claimsIdentity = User.Identity as ClaimsIdentity;
+            var errorMessage = int.TryParse(claimsIdentity.FindFirst(ClaimTypes.Name)?.Value, out var userId) ? "" : "Not logged in";
+
+            if (errorMessage.Length > 0)
+                return BadRequest(errorMessage);
+
+            var trades = await _tradeRepository.GetFinishedTradesByUserId(userId, page, pageSize);
             return Ok(trades);
         }
 
-        [HttpGet("user-purchases")]
-        public async Task<IActionResult> GetAllPurchasesByUserId(int userId)
+        [HttpGet("chart")]
+        public async Task<IActionResult> GetChartData(int userId)
         {
-            var trades = await _tradeRepository.GetBuyTradesByUserId(userId);
-            return Ok(trades);
+            var chartData = await _tradeRepository.AggregateChartData();
+            return Ok(chartData);
         }
     }
 }
