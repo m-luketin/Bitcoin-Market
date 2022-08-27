@@ -7,30 +7,30 @@ namespace BitcoinMarket.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Trades_Users_BuyerId",
-                table: "Trades");
+                name: "FK_Orders_Users_BuyerId",
+                table: "Orders");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_Trades_Users_SellerId",
-                table: "Trades");
+                name: "FK_Orders_Users_SellerId",
+                table: "Orders");
 
             migrationBuilder.DropIndex(
-                name: "IX_Trades_SellerId",
-                table: "Trades");
+                name: "IX_Orders_SellerId",
+                table: "Orders");
 
             migrationBuilder.DropColumn(
                 name: "SellerId",
-                table: "Trades");
+                table: "Orders");
 
             migrationBuilder.RenameColumn(
                 name: "BuyerId",
-                table: "Trades",
+                table: "Orders",
                 newName: "TransactionOwnerId");
 
             migrationBuilder.RenameIndex(
-                name: "IX_Trades_BuyerId",
-                table: "Trades",
-                newName: "IX_Trades_TransactionOwnerId");
+                name: "IX_Orders_BuyerId",
+                table: "Orders",
+                newName: "IX_Orders_TransactionOwnerId");
 
             migrationBuilder.AlterColumn<decimal>(
                 name: "BtcBalance",
@@ -44,7 +44,7 @@ namespace BitcoinMarket.Migrations
 
             migrationBuilder.AlterColumn<decimal>(
                 name: "ValueInBtc",
-                table: "Trades",
+                table: "Orders",
                 type: "decimal(20,10)",
                 precision: 20,
                 scale: 10,
@@ -54,56 +54,56 @@ namespace BitcoinMarket.Migrations
 
             migrationBuilder.AddColumn<decimal>(
                 name: "FilledValue",
-                table: "Trades",
+                table: "Orders",
                 type: "decimal(12,2)",
                 nullable: false,
                 defaultValue: 0m);
 
             migrationBuilder.AddColumn<bool>(
                 name: "IsBuy",
-                table: "Trades",
+                table: "Orders",
                 type: "bit",
                 nullable: false,
                 defaultValue: false);
 
             migrationBuilder.CreateTable(
-                name: "PartialTrades",
+                name: "PartialOrders",
                 columns: table => new
                 {
-                    PartialTradeId = table.Column<int>(type: "int", nullable: false)
+                    PartialOrderId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    SellTradeId = table.Column<int>(type: "int", nullable: false),
-                    BuyTradeId = table.Column<int>(type: "int", nullable: false),
+                    SellOrderId = table.Column<int>(type: "int", nullable: false),
+                    BuyOrderId = table.Column<int>(type: "int", nullable: false),
                     Value = table.Column<decimal>(type: "decimal(12,4)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PartialTrades", x => x.PartialTradeId);
+                    table.PrimaryKey("PK_PartialOrders", x => x.PartialOrderId);
                     table.ForeignKey(
-                        name: "FK_PartialTrades_Trades_BuyTradeId",
-                        column: x => x.BuyTradeId,
-                        principalTable: "Trades",
+                        name: "FK_PartialOrders_Orders_BuyOrderId",
+                        column: x => x.BuyOrderId,
+                        principalTable: "Orders",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_PartialTrades_Trades_SellTradeId",
-                        column: x => x.SellTradeId,
-                        principalTable: "Trades",
+                        name: "FK_PartialOrders_Orders_SellOrderId",
+                        column: x => x.SellOrderId,
+                        principalTable: "Orders",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_PartialTrades_BuyTradeId",
-                table: "PartialTrades",
-                column: "BuyTradeId");
+                name: "IX_PartialOrders_BuyOrderId",
+                table: "PartialOrders",
+                column: "BuyOrderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PartialTrades_SellTradeId",
-                table: "PartialTrades",
-                column: "SellTradeId");
+                name: "IX_PartialOrders_SellOrderId",
+                table: "PartialOrders",
+                column: "SellOrderId");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Trades_Users_TransactionOwnerId",
-                table: "Trades",
+                name: "FK_Orders_Users_TransactionOwnerId",
+                table: "Orders",
                 column: "TransactionOwnerId",
                 principalTable: "Users",
                 principalColumn: "Id");
@@ -112,29 +112,29 @@ namespace BitcoinMarket.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Trades_Users_TransactionOwnerId",
-                table: "Trades");
+                name: "FK_Orders_Users_TransactionOwnerId",
+                table: "Orders");
 
             migrationBuilder.DropTable(
-                name: "PartialTrades");
+                name: "PartialOrders");
 
             migrationBuilder.DropColumn(
                 name: "FilledValue",
-                table: "Trades");
+                table: "Orders");
 
             migrationBuilder.DropColumn(
                 name: "IsBuy",
-                table: "Trades");
+                table: "Orders");
 
             migrationBuilder.RenameColumn(
                 name: "TransactionOwnerId",
-                table: "Trades",
+                table: "Orders",
                 newName: "BuyerId");
 
             migrationBuilder.RenameIndex(
-                name: "IX_Trades_TransactionOwnerId",
-                table: "Trades",
-                newName: "IX_Trades_BuyerId");
+                name: "IX_Orders_TransactionOwnerId",
+                table: "Orders",
+                newName: "IX_Orders_BuyerId");
 
             migrationBuilder.AlterColumn<decimal>(
                 name: "BtcBalance",
@@ -148,7 +148,7 @@ namespace BitcoinMarket.Migrations
 
             migrationBuilder.AlterColumn<decimal>(
                 name: "ValueInBtc",
-                table: "Trades",
+                table: "Orders",
                 type: "decimal(12,4)",
                 nullable: false,
                 oldClrType: typeof(decimal),
@@ -158,27 +158,27 @@ namespace BitcoinMarket.Migrations
 
             migrationBuilder.AddColumn<int>(
                 name: "SellerId",
-                table: "Trades",
+                table: "Orders",
                 type: "int",
                 nullable: false,
                 defaultValue: 0);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Trades_SellerId",
-                table: "Trades",
+                name: "IX_Orders_SellerId",
+                table: "Orders",
                 column: "SellerId");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Trades_Users_BuyerId",
-                table: "Trades",
+                name: "FK_Orders_Users_BuyerId",
+                table: "Orders",
                 column: "BuyerId",
                 principalTable: "Users",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Trades_Users_SellerId",
-                table: "Trades",
+                name: "FK_Orders_Users_SellerId",
+                table: "Orders",
                 column: "SellerId",
                 principalTable: "Users",
                 principalColumn: "Id",

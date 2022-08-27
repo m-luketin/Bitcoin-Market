@@ -17,30 +17,30 @@ namespace BitcoinMarket.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [EnableCors("CorsPolicy")]
-    public class TradeController : ControllerBase
+    public class OrderController : ControllerBase
     {
-        public TradeController(ITradeRepository tradeRepository)
+        public OrderController(IOrderRepository orderRepository)
         {
-            _tradeRepository = tradeRepository;
+            _orderRepository = orderRepository;
         }
-        private readonly ITradeRepository _tradeRepository;
+        private readonly IOrderRepository _orderRepository;
 
         [Authorize]
         [HttpPost("add")]
-        public async Task<IActionResult> AddTrade([FromBody] JObject data)
+        public async Task<IActionResult> AddOrder([FromBody] JObject data)
         {
             var errorMessage = ""; var limitValue = 0.0m;
             var claimsIdentity = User.Identity as ClaimsIdentity;
             errorMessage = int.TryParse(claimsIdentity.FindFirst(ClaimTypes.Name)?.Value, out var userId) ? errorMessage : "Not logged in";
 
-            errorMessage = int.TryParse(data["type"]?.ToString(), out var type) ? errorMessage : "Trade type not valid";
-            errorMessage = decimal.TryParse(data["tradeValue"]?.ToString(), out var tradeValue) && tradeValue > 0 ? errorMessage : "Trade value not valid";
+            errorMessage = int.TryParse(data["type"]?.ToString(), out var type) ? errorMessage : "Order type not valid";
+            errorMessage = decimal.TryParse(data["orderValue"]?.ToString(), out var orderValue) && orderValue > 0 ? errorMessage : "Order value not valid";
             errorMessage = bool.TryParse(data["isBuy"]?.ToString(), out var isBuy) ? errorMessage : "IsBuy argument not valid";
-            if ((TradeType)type == (TradeType.LimitOrder))
+            if ((OrderType)type == (OrderType.LimitOrder))
                 errorMessage = decimal.TryParse(data["limitValue"]?.ToString(), out limitValue) && limitValue > 0 ? errorMessage : "Limit value not valid";
 
-            var addTradeErrorMessage = await _tradeRepository.AddTrade(userId, isBuy, type, tradeValue, limitValue);
-            errorMessage = addTradeErrorMessage.Length <= 0 ? errorMessage : addTradeErrorMessage;
+            var addOrderErrorMessage = await _orderRepository.AddOrder(userId, isBuy, type, orderValue, limitValue);
+            errorMessage = addOrderErrorMessage.Length <= 0 ? errorMessage : addOrderErrorMessage;
 
             if (errorMessage.Length > 0)
                 return BadRequest(errorMessage);
@@ -50,15 +50,15 @@ namespace BitcoinMarket.Controllers
 
         [Authorize]
         [HttpDelete]
-        public async Task<IActionResult> DeleteTrade(int tradeId)
+        public async Task<IActionResult> DeleteOrder(int orderId)
         {
             var errorMessage = "";;
             var claimsIdentity = User.Identity as ClaimsIdentity;
             errorMessage = int.TryParse(claimsIdentity.FindFirst(ClaimTypes.Name)?.Value, out var userId) ? errorMessage : "Not logged in";
 
 
-            var deleteTradeErrorMessage = await _tradeRepository.RemoveTrade(userId, tradeId);
-            errorMessage = deleteTradeErrorMessage.Length <= 0 ? errorMessage : deleteTradeErrorMessage;
+            var deleteOrderErrorMessage = await _orderRepository.RemoveOrder(userId, orderId);
+            errorMessage = deleteOrderErrorMessage.Length <= 0 ? errorMessage : deleteOrderErrorMessage;
 
             if (errorMessage.Length > 0)
                 return BadRequest(errorMessage);
@@ -67,16 +67,16 @@ namespace BitcoinMarket.Controllers
         }
 
         [HttpGet("latest")]
-        public async Task<IActionResult> GetLatestTrades(int page, int pageSize)
+        public async Task<IActionResult> GetLatestOrders(int page, int pageSize)
         {
-            var latestTrades = await _tradeRepository.GetLatestTrades(page, pageSize);
-            return Ok(latestTrades);
+            var latestOrders = await _orderRepository.GetLatestOrders(page, pageSize);
+            return Ok(latestOrders);
         }
 
         [HttpGet("sales")]
         public async Task<IActionResult> GetLatestSells(int page, int pageSize)
         {
-            var latestOffers = await _tradeRepository.GetLatestSells(page, pageSize);
+            var latestOffers = await _orderRepository.GetLatestSells(page, pageSize);
             return Ok(latestOffers);
         }
 
@@ -84,24 +84,24 @@ namespace BitcoinMarket.Controllers
         [HttpGet("buys")]
         public async Task<IActionResult> GetLatestBuys(int page, int pageSize)
         {
-            var latestOffers = await _tradeRepository.GetLatestBuys(page, pageSize);
+            var latestOffers = await _orderRepository.GetLatestBuys(page, pageSize);
             return Ok(latestOffers);
         }
 
         [HttpGet("get/{id}")]
-        public async Task<IActionResult> GetTrade(int id)
+        public async Task<IActionResult> GetOrder(int id)
         {
-            var gottenTrade = await _tradeRepository.GetTradeById(id);
+            var gottenOrder = await _orderRepository.GetOrderById(id);
 
-            if (gottenTrade != null)
-                return Ok(gottenTrade);
+            if (gottenOrder != null)
+                return Ok(gottenOrder);
 
             return NotFound();
         }
 
         [Authorize]
-        [HttpGet("finished-trades")]
-        public async Task<IActionResult> GetActiveUserTrades(int page, int pageSize)
+        [HttpGet("active-orders")]
+        public async Task<IActionResult> GetActiveUserOrders(int page, int pageSize)
         {
             var claimsIdentity = User.Identity as ClaimsIdentity;
             var errorMessage = int.TryParse(claimsIdentity.FindFirst(ClaimTypes.Name)?.Value, out var userId) ? "" : "Not logged in";
@@ -109,13 +109,13 @@ namespace BitcoinMarket.Controllers
             if (errorMessage.Length > 0)
                 return BadRequest(errorMessage);
 
-            var trades = await _tradeRepository.GetActiveTradesByUserId(userId, page, pageSize);
-            return Ok(trades);
+            var orders = await _orderRepository.GetActiveOrdersByUserId(userId, page, pageSize);
+            return Ok(orders);
         }
 
         [Authorize]
-        [HttpGet("active-trades")]
-        public async Task<IActionResult> GetFinishedTradesByUserId(int page, int pageSize)
+        [HttpGet("finished-orders")]
+        public async Task<IActionResult> GetFinishedOrdersByUserId(int page, int pageSize)
         {
             var claimsIdentity = User.Identity as ClaimsIdentity;
             var errorMessage = int.TryParse(claimsIdentity.FindFirst(ClaimTypes.Name)?.Value, out var userId) ? "" : "Not logged in";
@@ -123,14 +123,14 @@ namespace BitcoinMarket.Controllers
             if (errorMessage.Length > 0)
                 return BadRequest(errorMessage);
 
-            var trades = await _tradeRepository.GetFinishedTradesByUserId(userId, page, pageSize);
-            return Ok(trades);
+            var orders = await _orderRepository.GetFinishedOrdersByUserId(userId, page, pageSize);
+            return Ok(orders);
         }
 
         [HttpGet("chart")]
         public async Task<IActionResult> GetChartData(int userId)
         {
-            var chartData = await _tradeRepository.AggregateChartData();
+            var chartData = await _orderRepository.AggregateChartData();
             return Ok(chartData);
         }
     }

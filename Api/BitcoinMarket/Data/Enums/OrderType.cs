@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace BitcoinMarket.Data.Enums
 {
-    public enum TradeType
+    public enum OrderType
     {
         MarketOrder,
         LimitOrder

@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BitcoinMarket.Migrations
 {
     [DbContext(typeof(BitcoinMarketDbContext))]
-    [Migration("20220701185857_BrutalRefactor")]
-    partial class BrutalRefactor
+    [Migration("20220717195002_OrderIsCancelledBool")]
+    partial class OrderIsCancelledBool
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -28,10 +28,10 @@ namespace BitcoinMarket.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("BuyOrderId")
+                    b.Property<int?>("BuyOrderId")
                         .HasColumnType("int");
 
-                    b.Property<int>("SellOrderId")
+                    b.Property<int?>("SellOrderId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("Value")
@@ -57,6 +57,9 @@ namespace BitcoinMarket.Migrations
                         .HasColumnType("decimal(12,2)");
 
                     b.Property<bool>("IsBuy")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsCancelled")
                         .HasColumnType("bit");
 
                     b.Property<DateTime?>("TransactionFinished")
@@ -114,15 +117,11 @@ namespace BitcoinMarket.Migrations
                 {
                     b.HasOne("BitcoinMarket.Data.Order", "BuyOrder")
                         .WithMany("PartialBuyOrders")
-                        .HasForeignKey("BuyOrderId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .HasForeignKey("BuyOrderId");
 
                     b.HasOne("BitcoinMarket.Data.Order", "SellOrder")
                         .WithMany("PartialSellOrders")
-                        .HasForeignKey("SellOrderId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .HasForeignKey("SellOrderId");
 
                     b.Navigation("BuyOrder");
 
@@ -133,8 +132,7 @@ namespace BitcoinMarket.Migrations
                 {
                     b.HasOne("BitcoinMarket.Data.User", "TransactionOwner")
                         .WithMany("Orders")
-                        .HasForeignKey("TransactionOwnerId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .HasForeignKey("TransactionOwnerId");
 
                     b.Navigation("TransactionOwner");
                 });

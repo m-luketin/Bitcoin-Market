@@ -21,7 +21,7 @@ namespace BitcoinMarket.Migrations
                 .HasAnnotation("ProductVersion", "5.0.15")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("BitcoinMarket.Data.Trade", b =>
+            modelBuilder.Entity("BitcoinMarket.Data.Order", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -55,7 +55,7 @@ namespace BitcoinMarket.Migrations
 
                     b.HasIndex("SellerId");
 
-                    b.ToTable("Trades");
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("BitcoinMarket.Data.User", b =>
@@ -82,14 +82,14 @@ namespace BitcoinMarket.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("BitcoinMarket.Data.Trade", b =>
+            modelBuilder.Entity("BitcoinMarket.Data.Order", b =>
                 {
                     b.HasOne("BitcoinMarket.Data.User", "Buyer")
-                        .WithMany("BuyerTrades")
+                        .WithMany("BuyerOrders")
                         .HasForeignKey("BuyerId");
 
                     b.HasOne("BitcoinMarket.Data.User", "Seller")
-                        .WithMany("SellerTrades")
+                        .WithMany("SellerOrders")
                         .HasForeignKey("SellerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -101,9 +101,9 @@ namespace BitcoinMarket.Migrations
 
             modelBuilder.Entity("BitcoinMarket.Data.User", b =>
                 {
-                    b.Navigation("BuyerTrades");
+                    b.Navigation("BuyerOrders");
 
-                    b.Navigation("SellerTrades");
+                    b.Navigation("SellerOrders");
                 });
 #pragma warning restore 612, 618
         }

@@ -8,7 +8,7 @@ namespace BitcoinMarket.Migrations
         {
             migrationBuilder.AlterColumn<int>(
                 name: "TransactionOwnerId",
-                table: "Trades",
+                table: "Orders",
                 type: "int",
                 nullable: false,
                 defaultValue: 0,
@@ -21,7 +21,7 @@ namespace BitcoinMarket.Migrations
         {
             migrationBuilder.AlterColumn<int>(
                 name: "TransactionOwnerId",
-                table: "Trades",
+                table: "Orders",
                 type: "int",
                 nullable: true,
                 oldClrType: typeof(int),

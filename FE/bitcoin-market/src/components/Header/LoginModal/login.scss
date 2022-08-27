@@ -1,0 +1,67 @@
+.login-modal-header {
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 10px;
+	background-color: #ccc;
+	padding: 0 0 0 10px;
+
+	.login-modal-title,
+	.login-modal-close {
+		font-size: 24px;
+	}
+
+	.login-modal-close {
+		background-color: var(--bitcoin-orange);
+		padding: 0px 8px 3px 8px;
+		border-radius: 4px;
+		font-weight: bold;
+	}
+}
+
+.login-modal-body {
+	padding: 0 16px;
+
+	.login-input-username {
+		display: flex;
+		flex-direction: column;
+
+		.username-label {
+			font-size: 14px;
+		}
+	}
+
+	.login-input-password {
+		display: flex;
+		flex-direction: column;
+		margin-top: 10px;
+
+		.password-label {
+			font-size: 14px;
+		}
+	}
+
+	.submit-button-container {
+		.submit-button {
+			margin-top: 20px;
+			padding: 2px 5px;
+		}
+
+		.validation-error {
+			color: red;
+			width: 100%;
+			margin-left: 24px;
+			height: 21px;
+		}
+	}
+
+	.login-switch {
+		margin: 20px 0;
+
+		.switch-button {
+			margin-left: 15px;
+			color: var(--bitcoin-orange);
+			text-decoration: underline;
+			font-weight: bold;
+		}
+	}
+}

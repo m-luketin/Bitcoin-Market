@@ -2,21 +2,21 @@
 
 namespace BitcoinMarket.Migrations
 {
-    public partial class nullablePartialTradeKeys : Migration
+    public partial class nullablePartialOrderKeys : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<int>(
-                name: "SellTradeId",
-                table: "PartialTrades",
+                name: "SellOrderId",
+                table: "PartialOrders",
                 type: "int",
                 nullable: true,
                 oldClrType: typeof(int),
                 oldType: "int");
 
             migrationBuilder.AlterColumn<int>(
-                name: "BuyTradeId",
-                table: "PartialTrades",
+                name: "BuyOrderId",
+                table: "PartialOrders",
                 type: "int",
                 nullable: true,
                 oldClrType: typeof(int),
@@ -26,8 +26,8 @@ namespace BitcoinMarket.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<int>(
-                name: "SellTradeId",
-                table: "PartialTrades",
+                name: "SellOrderId",
+                table: "PartialOrders",
                 type: "int",
                 nullable: false,
                 defaultValue: 0,
@@ -36,8 +36,8 @@ namespace BitcoinMarket.Migrations
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<int>(
-                name: "BuyTradeId",
-                table: "PartialTrades",
+                name: "BuyOrderId",
+                table: "PartialOrders",
                 type: "int",
                 nullable: false,
                 defaultValue: 0,

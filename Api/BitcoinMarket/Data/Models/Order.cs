@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 
 namespace BitcoinMarket.Data
 {
-    public class Trade
+    public class Order
     {
         public int Id { get; set; }
         public int? TransactionOwnerId { get; set; }
         
         public User TransactionOwner { get; set; }
-        public ICollection<PartialTrade> PartialBuyTrades { get; set; }
-        public ICollection<PartialTrade> PartialSellTrades { get; set; }
+        public ICollection<PartialOrder> PartialBuyOrders { get; set; }
+        public ICollection<PartialOrder> PartialSellOrders { get; set; }
         public DateTime TransactionStarted { get; set; }
         public DateTime? TransactionFinished { get; set; }
 
@@ -29,6 +29,8 @@ namespace BitcoinMarket.Data
         public decimal FilledValue { get; set; }
 
         public bool IsBuy { get; set; }
-        public TradeType Type{ get; set; }
+        public bool IsCancelled { get; set; }
+        public OrderType Type{ get; set; }
+
     }
 }

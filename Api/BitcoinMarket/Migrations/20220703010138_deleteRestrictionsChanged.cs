@@ -7,36 +7,36 @@ namespace BitcoinMarket.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_PartialTrades_Trades_BuyTradeId",
-                table: "PartialTrades");
+                name: "FK_PartialOrders_Orders_BuyOrderId",
+                table: "PartialOrders");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_PartialTrades_Trades_SellTradeId",
-                table: "PartialTrades");
+                name: "FK_PartialOrders_Orders_SellOrderId",
+                table: "PartialOrders");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_Trades_Users_TransactionOwnerId",
-                table: "Trades");
+                name: "FK_Orders_Users_TransactionOwnerId",
+                table: "Orders");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_PartialTrades_Trades_BuyTradeId",
-                table: "PartialTrades",
-                column: "BuyTradeId",
-                principalTable: "Trades",
+                name: "FK_PartialOrders_Orders_BuyOrderId",
+                table: "PartialOrders",
+                column: "BuyOrderId",
+                principalTable: "Orders",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_PartialTrades_Trades_SellTradeId",
-                table: "PartialTrades",
-                column: "SellTradeId",
-                principalTable: "Trades",
+                name: "FK_PartialOrders_Orders_SellOrderId",
+                table: "PartialOrders",
+                column: "SellOrderId",
+                principalTable: "Orders",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Trades_Users_TransactionOwnerId",
-                table: "Trades",
+                name: "FK_Orders_Users_TransactionOwnerId",
+                table: "Orders",
                 column: "TransactionOwnerId",
                 principalTable: "Users",
                 principalColumn: "Id",
@@ -46,34 +46,34 @@ namespace BitcoinMarket.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_PartialTrades_Trades_BuyTradeId",
-                table: "PartialTrades");
+                name: "FK_PartialOrders_Orders_BuyOrderId",
+                table: "PartialOrders");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_PartialTrades_Trades_SellTradeId",
-                table: "PartialTrades");
+                name: "FK_PartialOrders_Orders_SellOrderId",
+                table: "PartialOrders");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_Trades_Users_TransactionOwnerId",
-                table: "Trades");
+                name: "FK_Orders_Users_TransactionOwnerId",
+                table: "Orders");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_PartialTrades_Trades_BuyTradeId",
-                table: "PartialTrades",
-                column: "BuyTradeId",
-                principalTable: "Trades",
+                name: "FK_PartialOrders_Orders_BuyOrderId",
+                table: "PartialOrders",
+                column: "BuyOrderId",
+                principalTable: "Orders",
                 principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_PartialTrades_Trades_SellTradeId",
-                table: "PartialTrades",
-                column: "SellTradeId",
-                principalTable: "Trades",
+                name: "FK_PartialOrders_Orders_SellOrderId",
+                table: "PartialOrders",
+                column: "SellOrderId",
+                principalTable: "Orders",
                 principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Trades_Users_TransactionOwnerId",
-                table: "Trades",
+                name: "FK_Orders_Users_TransactionOwnerId",
+                table: "Orders",
                 column: "TransactionOwnerId",
                 principalTable: "Users",
                 principalColumn: "Id");

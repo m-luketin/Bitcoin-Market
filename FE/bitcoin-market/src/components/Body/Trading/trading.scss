@@ -1,0 +1,115 @@
+.trading {
+	width: 30%;
+	height: 340px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	border-left: 1px solid var(--off-black);
+
+	.trading-body {
+		padding: 16px;
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: space-between;
+
+		.trading-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			width: 100%;
+
+			.trading-mode,
+			.trading-type {
+				display: flex;
+				justify-content: center;
+			}
+
+			.trading-mode .trading-mode-button,
+			.trading-type .trading-type-button {
+				padding: 2px 5px;
+				background-color: var(--off-black);
+				color: white;
+				width: 70px;
+
+				&-buy,
+				&-market {
+					border-top-left-radius: 4px;
+					border-bottom-left-radius: 4px;
+				}
+
+				&-sell,
+				&-limit {
+					border-top-right-radius: 4px;
+					border-bottom-right-radius: 4px;
+				}
+
+				&.active {
+					color: var(--bitcoin-orange);
+					border-bottom: 2px solid var(--bitcoin-orange);
+					font-weight: bold;
+				}
+			}
+		}
+
+		.trading-inputs {
+			display: flex;
+			flex-direction: column;
+
+			.trading-inputs-order,
+			.trading-inputs-limit {
+				margin: 20px 0;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+
+				input {
+					margin-top: 4px;
+				}
+			}
+		}
+
+		.trading-confirm-container {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+
+			.validation-error {
+				color: red;
+				text-align: center;
+				width: 100%;
+				margin-bottom: 2px;
+				height: 42px;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+
+			.trading-confirm {
+				padding: 4px 8px;
+				border: 1px solid var(--off-black);
+				font-weight: bold;
+				width: 280px;
+
+				&--buy {
+					background-color: #ff9d00;
+				}
+
+				&--sell {
+					background-color: #ff0000;
+					color: white;
+				}
+			}
+		}
+	}
+
+	.trading-login-message {
+		text-align: center;
+		height: 33%;
+		width: 100%;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+}

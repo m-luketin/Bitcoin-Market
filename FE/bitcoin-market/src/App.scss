@@ -27,6 +27,10 @@
 }
 :root {
 	--bitcoin-orange: #ff9900;
-	--bitcoin-orange--opaque: #ff990011;
-	--off-black: #222222;
+	--light-gray: #fefefe;
+	--off-black: #111;
+}
+
+.app-order-data-container {
+	display: flex;
 }

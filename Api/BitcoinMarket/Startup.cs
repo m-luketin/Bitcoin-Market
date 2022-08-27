@@ -30,7 +30,7 @@ namespace BitcoinMarket
             services.AddDbContext<BitcoinMarketDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("BitcoinMarketDbContext")));
 
-            services.AddScoped<ITradeRepository, TradeRepository>();
+            services.AddScoped<IOrderRepository, OrderRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
 
             services.AddCors(options =>

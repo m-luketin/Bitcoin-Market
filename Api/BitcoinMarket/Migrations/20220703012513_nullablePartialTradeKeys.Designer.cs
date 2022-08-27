@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BitcoinMarket.Migrations
 {
     [DbContext(typeof(BitcoinMarketDbContext))]
-    [Migration("20220703012513_nullablePartialTradeKeys")]
-    partial class nullablePartialTradeKeys
+    [Migration("20220703012513_nullablePartialOrderKeys")]
+    partial class nullablePartialOrderKeys
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -21,32 +21,32 @@ namespace BitcoinMarket.Migrations
                 .HasAnnotation("ProductVersion", "5.0.15")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("BitcoinMarket.Data.Models.PartialTrade", b =>
+            modelBuilder.Entity("BitcoinMarket.Data.Models.PartialOrder", b =>
                 {
-                    b.Property<int>("PartialTradeId")
+                    b.Property<int>("PartialOrderId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("BuyTradeId")
+                    b.Property<int?>("BuyOrderId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("SellTradeId")
+                    b.Property<int?>("SellOrderId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("Value")
                         .HasColumnType("decimal(12,4)");
 
-                    b.HasKey("PartialTradeId");
+                    b.HasKey("PartialOrderId");
 
-                    b.HasIndex("BuyTradeId");
+                    b.HasIndex("BuyOrderId");
 
-                    b.HasIndex("SellTradeId");
+                    b.HasIndex("SellOrderId");
 
-                    b.ToTable("PartialTrades");
+                    b.ToTable("PartialOrders");
                 });
 
-            modelBuilder.Entity("BitcoinMarket.Data.Trade", b =>
+            modelBuilder.Entity("BitcoinMarket.Data.Order", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -82,7 +82,7 @@ namespace BitcoinMarket.Migrations
 
                     b.HasIndex("TransactionOwnerId");
 
-                    b.ToTable("Trades");
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("BitcoinMarket.Data.User", b =>
@@ -110,27 +110,27 @@ namespace BitcoinMarket.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("BitcoinMarket.Data.Models.PartialTrade", b =>
+            modelBuilder.Entity("BitcoinMarket.Data.Models.PartialOrder", b =>
                 {
-                    b.HasOne("BitcoinMarket.Data.Trade", "BuyTrade")
-                        .WithMany("PartialBuyTrades")
-                        .HasForeignKey("BuyTradeId")
+                    b.HasOne("BitcoinMarket.Data.Order", "BuyOrder")
+                        .WithMany("PartialBuyOrders")
+                        .HasForeignKey("BuyOrderId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("BitcoinMarket.Data.Trade", "SellTrade")
-                        .WithMany("PartialSellTrades")
-                        .HasForeignKey("SellTradeId")
+                    b.HasOne("BitcoinMarket.Data.Order", "SellOrder")
+                        .WithMany("PartialSellOrders")
+                        .HasForeignKey("SellOrderId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Navigation("BuyTrade");
+                    b.Navigation("BuyOrder");
 
-                    b.Navigation("SellTrade");
+                    b.Navigation("SellOrder");
                 });
 
-            modelBuilder.Entity("BitcoinMarket.Data.Trade", b =>
+            modelBuilder.Entity("BitcoinMarket.Data.Order", b =>
                 {
                     b.HasOne("BitcoinMarket.Data.User", "TransactionOwner")
-                        .WithMany("Trades")
+                        .WithMany("Orders")
                         .HasForeignKey("TransactionOwnerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -138,16 +138,16 @@ namespace BitcoinMarket.Migrations
                     b.Navigation("TransactionOwner");
                 });
 
-            modelBuilder.Entity("BitcoinMarket.Data.Trade", b =>
+            modelBuilder.Entity("BitcoinMarket.Data.Order", b =>
                 {
-                    b.Navigation("PartialBuyTrades");
+                    b.Navigation("PartialBuyOrders");
 
-                    b.Navigation("PartialSellTrades");
+                    b.Navigation("PartialSellOrders");
                 });
 
             modelBuilder.Entity("BitcoinMarket.Data.User", b =>
                 {
-                    b.Navigation("Trades");
+                    b.Navigation("Orders");
                 });
 #pragma warning restore 612, 618
         }

@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace BitcoinMarket.Data.Models
 {
-    public class PartialTrade
+    public class PartialOrder
     {
-        public int PartialTradeId { get; set; }
-        public int? SellTradeId { get; set; }
-        public Trade SellTrade { get; set; }
-        public int? BuyTradeId { get; set; }
-        public Trade BuyTrade { get; set; }
+        public int PartialOrderId { get; set; }
+        public int? SellOrderId { get; set; }
+        public Order SellOrder { get; set; }
+        public int? BuyOrderId { get; set; }
+        public Order BuyOrder { get; set; }
 
         [Column(TypeName = "decimal(12,4)")]
         public decimal Value { get; set; }

@@ -1,20 +1,26 @@
 const baseUrl = "https://localhost:44322/api";
 
 const controllerUrls = {
-	trade: baseUrl + "/Trade",
+	order: baseUrl + "/Order",
 	user: baseUrl + "/User",
 };
 
 export const urls = {
-	addTrade: controllerUrls.trade + "/add",
-	getLatestTrades: controllerUrls.trade + "/latest",
-	getLatestOffers: controllerUrls.trade + "/get",
-	getTradesByUser: controllerUrls.trade + "/user-trades",
-	getSalesByUser: controllerUrls.trade + "/user-sales",
-	getPurchasesByUser: controllerUrls.trade + "/user-purchases",
+	addOrder: controllerUrls.order + "/add",
+	getLatestOrders: controllerUrls.order + "/latest",
+	getLatestSales: controllerUrls.order + "/sales",
+	getLatestBuys: controllerUrls.order + "/buys",
+	getOrdersByUser: controllerUrls.order + "/user-orders",
+	getSalesByUser: controllerUrls.order + "/user-sales",
+	getPurchasesByUser: controllerUrls.order + "/user-purchases",
+	getChartData: controllerUrls.order + "/chart",
+	getUserActiveOrders: controllerUrls.order + "/active-orders",
+	getUserFinishedOrders: controllerUrls.order + "/finished-orders",
+	deleteOrder: controllerUrls.order,
 	getUserById: controllerUrls.user + "/get",
 	getUserByUsername: controllerUrls.user + "/username",
 	registerUser: controllerUrls.user + "/register",
-	getUsersByTrade: controllerUrls.user + "/trade",
+	getUsersByOrder: controllerUrls.user + "/order",
 	logInUser: controllerUrls.user + "/login",
+	setUserBalance: controllerUrls.user + "/balance",
 };

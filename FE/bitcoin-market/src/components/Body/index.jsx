@@ -1,13 +1,18 @@
 import React from "react";
-import TradeHistory from "./TradeHistory";
+import OrderHistory from "./OrderHistory";
 import Trading from "./Trading";
 import "./body.scss";
+import ChartComponent from "../ChartComponent";
 
-const Body = () => {
+const Body = ({ isLoggedIn, rerenderOffers, hackyRerenderVariable }) => {
 	return (
 		<div className="body">
-			<TradeHistory />
-			<Trading />
+			<ChartComponent hackyRerenderVariable={hackyRerenderVariable} />
+			<Trading
+				isLoggedIn={isLoggedIn}
+				rerenderOffers={rerenderOffers}
+				hackyRerenderVariable={hackyRerenderVariable}
+			/>
 		</div>
 	);
 };

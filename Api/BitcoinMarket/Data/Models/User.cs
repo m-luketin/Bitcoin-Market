@@ -19,6 +19,6 @@ namespace BitcoinMarket.Data
         [Column(TypeName = "decimal(12,4)")]
         public decimal BtcBalance { get; set; }
 
-        public ICollection<Trade> Trades { get; set; }
+        public ICollection<Order> Orders { get; set; }
     }
 }
