@@ -11,6 +11,8 @@ namespace BitcoinMarket.Repositories.Interfaces
     {
         Task<User> GetUserById(int id);
 
+        Task<List<User>> GetAllUsers(int id);
+
         Task<User> GetUserByUsername(string username);
 
         Task<bool> Login(string username, string password);
@@ -19,5 +21,8 @@ namespace BitcoinMarket.Repositories.Interfaces
 
         Task<string> SetUserBalance(int userId, decimal usdBalance, decimal btcBalance);
 
+        Task<bool> RemoveUser(int userId);
+
+        bool IsUserAdmin(int userId);
     }
 }

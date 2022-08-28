@@ -19,11 +19,14 @@ namespace BitcoinMarket.Controllers
     [EnableCors("CorsPolicy")]
     public class OrderController : ControllerBase
     {
-        public OrderController(IOrderRepository orderRepository)
+        public OrderController(IOrderRepository orderRepository, IUserRepository userRepository)
         {
             _orderRepository = orderRepository;
+            _userRepository = userRepository;
         }
+
         private readonly IOrderRepository _orderRepository;
+        private readonly IUserRepository _userRepository;
 
         [Authorize]
         [HttpPost("add")]
@@ -100,6 +103,24 @@ namespace BitcoinMarket.Controllers
         }
 
         [Authorize]
+        [HttpGet("get")]
+        public async Task<IActionResult> GetAllOrders()
+        {
+            var claimsIdentity = User.Identity as ClaimsIdentity;
+            var errorMessage = int.TryParse(claimsIdentity.FindFirst(ClaimTypes.Name)?.Value, out var userId) ? "" : "Not logged in";
+            errorMessage = _userRepository.IsUserAdmin(userId) ? errorMessage : "Not admin";
+            if (errorMessage.Length > 0)
+                return BadRequest(errorMessage);
+
+            var users = await _orderRepository.GetAllOrders();
+
+            if (users != null)
+                return Ok(users);
+
+            return Forbid();
+        }
+
+        [Authorize]
         [HttpGet("active-orders")]
         public async Task<IActionResult> GetActiveUserOrders(int page, int pageSize)
         {
@@ -132,6 +153,13 @@ namespace BitcoinMarket.Controllers
         {
             var chartData = await _orderRepository.AggregateChartData();
             return Ok(chartData);
+        }
+
+        [Authorize]
+        [HttpGet("stats")]
+        public async Task<IActionResult> GetStats()
+        {
+            return Ok(_orderRepository.GetStats());
         }
     }
 }

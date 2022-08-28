@@ -20,5 +20,6 @@ namespace BitcoinMarket.Data
         public decimal BtcBalance { get; set; }
 
         public ICollection<Order> Orders { get; set; }
+        public bool isAdmin { get; set; }
     }
 }

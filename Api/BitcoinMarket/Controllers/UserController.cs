@@ -44,6 +44,24 @@ namespace BitcoinMarket.Controllers
             return NotFound();
         }
 
+        [Authorize]
+        [HttpGet("get")]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var claimsIdentity = User.Identity as ClaimsIdentity;
+            var errorMessage = int.TryParse(claimsIdentity.FindFirst(ClaimTypes.Name)?.Value, out var userId) ? "" : "Not logged in";
+            errorMessage = _userRepository.IsUserAdmin(userId) ? errorMessage : "Not admin";
+            if (errorMessage.Length > 0)
+                return BadRequest(errorMessage);
+
+            var users = await _userRepository.GetAllUsers(userId);
+
+            if (users != null)
+                return Ok(users);
+
+            return NotFound();
+        }
+
         [HttpGet("username")]
         public async Task<IActionResult> GetUserByUsername(string username)
         {
@@ -74,6 +92,31 @@ namespace BitcoinMarket.Controllers
                 return BadRequest("Something went wrong during user creation");
         }
 
+        [Authorize]
+        [HttpPost("admin-remove-user")]
+        public async Task<IActionResult> AdminRemoveUser([FromBody] JObject data)
+        {
+            var claimsIdentity = User.Identity as ClaimsIdentity;
+
+            var errorMessage = int.TryParse(claimsIdentity.FindFirst(ClaimTypes.Name)?.Value, out var userId) ? "" : "Not logged in";
+            errorMessage = int.TryParse(data["userToRemoveId"]?.ToString(), out var userToRemoveId) ? errorMessage : "User id to remove not valid";
+            errorMessage = _userRepository.IsUserAdmin(userId) ? errorMessage : "Not admin";
+            if (errorMessage.Length > 0)
+                return BadRequest(errorMessage);
+
+            await _userRepository.RemoveUser(userToRemoveId);
+            return Ok();
+        }
+
+
+        [Authorize]
+        [HttpGet("admin")]
+        public async Task<IActionResult> IsUserAdmin()
+        {
+            var claimsIdentity = User.Identity as ClaimsIdentity;
+            return Ok(int.TryParse(claimsIdentity.FindFirst(ClaimTypes.Name)?.Value, out var userId) && _userRepository.IsUserAdmin(userId));
+        }
+
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody]JObject userData)
         {
@@ -102,7 +145,6 @@ namespace BitcoinMarket.Controllers
 
             return Ok(loginResponse);
         }
-
 
         [Authorize]
         [HttpPost("balance")]

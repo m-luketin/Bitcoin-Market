@@ -11,12 +11,14 @@ namespace BitcoinMarket.Repositories.Interfaces
     {
         Task<string> AddOrder(int userId, bool IsBuy, int type, decimal orderValue, decimal limitValue);
         Task<Order> GetOrderById(int id);
+        Task<List<Order>> GetAllOrders();
         Task<List<Order>> GetActiveOrdersByUserId(int userId, int page, int pageSize);
         Task<List<Order>> GetFinishedOrdersByUserId(int userId, int page, int pageSize);
         Task<List<Order>> GetLatestOrders(int page, int pageSize);
         Task<List<Order>> GetLatestSells(int page, int pageSize);
         Task<List<Order>> GetLatestBuys(int page, int pageSize);
         Task<List<ChartPoint>> AggregateChartData();
+        Stats GetStats();
         Task<string> RemoveOrder(int userId, int orderId);
 
     }

@@ -14,9 +14,12 @@ namespace BitcoinMarket.Repositories.Implementations
     public class OrderRepository : IOrderRepository
     {
         private readonly BitcoinMarketDbContext _context;
-        public OrderRepository(BitcoinMarketDbContext context)
+        private readonly IUserRepository _userRepository;
+
+        public OrderRepository(BitcoinMarketDbContext context, IUserRepository userRepository)
         {
             _context = context;
+            _userRepository = userRepository;
         }
 
         public async Task<string> AddOrder(int userId, bool isBuy, int type, decimal orderValue, decimal limitValue)
@@ -168,6 +171,11 @@ namespace BitcoinMarket.Repositories.Implementations
             return "";
         }
 
+        public async Task<List<Order>> GetAllOrders()
+        {
+            return await _context.Orders.ToListAsync();
+        }
+
         private async Task<List<Order>> GetBestSellOffers()
         {
             return await _context.Orders.Where(t => t.TransactionFinished == null && !t.IsBuy && !t.IsCancelled)
@@ -305,17 +313,19 @@ namespace BitcoinMarket.Repositories.Implementations
 
         public async Task<string> RemoveOrder(int userId, int orderId)
         {
-            var order = await _context.Orders.FindAsync(orderId);
+            var order = await _context.Orders.Include(o => o.TransactionOwner).FirstOrDefaultAsync(o => o.Id == orderId);
             if(order == null)
                 return "Order does not exist";
 
             if (order.IsCancelled)
                 return "Order already cancelled";
 
-            if (order.TransactionOwnerId != userId)
+            var isUserAdmin = _userRepository.IsUserAdmin(userId);
+
+            if (order.TransactionOwnerId != userId || !isUserAdmin)
                 return "You are not allowed to delete this order since it is not yours";
 
-            var user = await _context.Users.FindAsync(userId);
+            var user = !isUserAdmin ? await _context.Users.FindAsync(userId) : order.TransactionOwner;
             if(order.IsBuy)
                 user.UsdBalance += order.ValueInUsd - order.FilledValue;
             else
@@ -327,6 +337,16 @@ namespace BitcoinMarket.Repositories.Implementations
             await _context.SaveChangesAsync();
             
             return "";
+        }
+
+        public Stats GetStats()
+        {
+            var stats = new Stats();
+
+            stats.LastDayVolume = _context.Orders.Where(o => o.TransactionFinished > DateTime.Now.AddDays(-1)).Sum(o => o.ValueInUsd);
+            stats.NumberOfUsers = _context.Users.Count();
+
+            return stats;
         }
     }
 }

@@ -1,0 +1,54 @@
+.single-user {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	width: 100%;
+	border-bottom: 1px dotted #aaa;
+	position: relative;
+
+	.single-user-item {
+		width: 25%;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		padding: 5px 0;
+		overflow: hidden;
+		word-break: break-all;
+		text-align: center;
+		border-right: 1px dotted #ddd;
+	}
+
+	.single-user-item-overlay {
+		height: 100%;
+		position: absolute;
+		background-color: #ff150022;
+		left: 0;
+	}
+
+	.single-user-item-overlay--buy {
+		height: 100%;
+		position: absolute;
+		right: 0;
+		background-color: #26ff0022;
+	}
+
+	.single-user-item-cancel {
+		font-weight: bold;
+		padding: 0 6px;
+		color: var(--bitcoin-orange);
+
+		&:hover {
+			color: red;
+		}
+	}
+
+	.single-user-type-value {
+		display: flex;
+		flex-direction: column;
+
+		.single-cancelled-user {
+			font-size: 10px;
+			color: red;
+		}
+	}
+}

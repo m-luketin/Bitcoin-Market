@@ -22,6 +22,18 @@ namespace BitcoinMarket.Repositories.Implementations
             return await _context.Users.FindAsync(id);
         }
 
+        public async Task<List<User>> GetAllUsers(int userId)
+        {
+            if (!IsUserAdmin(userId))
+                return null;
+
+            var allUsers = await _context.Users.ToListAsync();
+            var userToExclude = await _context.Users.FindAsync(userId);
+            allUsers.Remove(userToExclude);
+            return allUsers;
+        }
+
+
         public async Task<User> GetUserByUsername(string username)
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
@@ -54,6 +66,37 @@ namespace BitcoinMarket.Repositories.Implementations
             user.BtcBalance = btcBalance;
             await _context.SaveChangesAsync();
             return "";
+        }
+
+        public async Task<bool> RemoveUser(int userId)
+        {
+            var userOrders = _context.Orders.Where(o => o.TransactionOwnerId == userId).Include(o => o.PartialBuyOrders).Include(o => o.PartialSellOrders);
+
+            foreach (var userOrder in userOrders)
+            {
+                foreach (var partialSellOrder in userOrder.PartialSellOrders)
+                {
+                    _context.PartialOrders.Remove(partialSellOrder);
+                }
+
+                foreach (var partialBuyOrder in userOrder.PartialSellOrders)
+                {
+                    _context.PartialOrders.Remove(partialBuyOrder);
+                }
+
+                _context.Orders.Remove(userOrder);
+            }
+
+            var userToDelete = _context.Users.Find(userId);
+            _context.Users.Remove(userToDelete);
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public bool IsUserAdmin(int userId)
+        {
+            return _context.Users.Any(u => u.Id == userId && u.isAdmin);
         }
     }
 }
