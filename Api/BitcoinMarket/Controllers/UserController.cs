@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Security.Claims;
@@ -154,8 +155,8 @@ namespace BitcoinMarket.Controllers
             var claimsIdentity = User.Identity as ClaimsIdentity;
             var errorMessage = int.TryParse(claimsIdentity.FindFirst(ClaimTypes.Name)?.Value, out var userId) ? "" : "Not logged in";
 
-            errorMessage = decimal.TryParse(data["balanceUsd"]?.ToString(), out var usdBalance) && usdBalance > 0 ? errorMessage : "USD balance value not valid";
-            errorMessage = decimal.TryParse(data["balanceBtc"]?.ToString(), out var btcBalance) && btcBalance > 0 ? errorMessage : "BTC balance value not valid";
+            errorMessage = decimal.TryParse(data["balanceUsd"]?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var usdBalance) && usdBalance > 0 ? errorMessage : "USD balance value not valid";
+            errorMessage = decimal.TryParse(data["balanceBtc"]?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var btcBalance) && btcBalance > 0 ? errorMessage : "BTC balance value not valid";
 
             if (errorMessage.Length > 0)
                 return BadRequest(errorMessage);

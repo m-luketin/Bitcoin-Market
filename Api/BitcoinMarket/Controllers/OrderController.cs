@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -37,10 +38,10 @@ namespace BitcoinMarket.Controllers
             errorMessage = int.TryParse(claimsIdentity.FindFirst(ClaimTypes.Name)?.Value, out var userId) ? errorMessage : "Not logged in";
 
             errorMessage = int.TryParse(data["type"]?.ToString(), out var type) ? errorMessage : "Order type not valid";
-            errorMessage = decimal.TryParse(data["orderValue"]?.ToString(), out var orderValue) && orderValue > 0 ? errorMessage : "Order value not valid";
+            errorMessage = decimal.TryParse(data["orderValue"]?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var orderValue) && orderValue > 0 ? errorMessage : "Order value not valid";
             errorMessage = bool.TryParse(data["isBuy"]?.ToString(), out var isBuy) ? errorMessage : "IsBuy argument not valid";
             if ((OrderType)type == (OrderType.LimitOrder))
-                errorMessage = decimal.TryParse(data["limitValue"]?.ToString(), out limitValue) && limitValue > 0 ? errorMessage : "Limit value not valid";
+                errorMessage = decimal.TryParse(data["limitValue"]?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out limitValue) && limitValue > 0 ? errorMessage : "Limit value not valid";
 
             var addOrderErrorMessage = await _orderRepository.AddOrder(userId, isBuy, type, orderValue, limitValue);
             errorMessage = addOrderErrorMessage.Length <= 0 ? errorMessage : addOrderErrorMessage;

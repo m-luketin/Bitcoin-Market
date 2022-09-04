@@ -15,7 +15,7 @@ const Trading = ({ isLoggedIn, rerenderOffers, hackyRerenderVariable }) => {
 	const confirmOrder = async () => {
 		try {
 			const bearer = localStorage.getItem("Bearer");
-			const response = await axios.post(
+			await axios.post(
 				urls.addOrder,
 				isMarketOrder
 					? { type: 0, isBuy, orderValue }
@@ -104,6 +104,8 @@ const Trading = ({ isLoggedIn, rerenderOffers, hackyRerenderVariable }) => {
 								onChange={(e) => {
 									try {
 										const bigNumber = new Big(e.target.value);
+										console.log(e.target.value);
+										console.log(bigNumber);
 										setOrderValue(bigNumber);
 									} catch (error) {
 										setOrderValue(e.target.value);

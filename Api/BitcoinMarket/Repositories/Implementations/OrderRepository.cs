@@ -29,145 +29,166 @@ namespace BitcoinMarket.Repositories.Implementations
             if (orderValue == 0 || (orderType == OrderType.LimitOrder && limitValue == 0))
                 return "Invalid value";
 
-            var userToCharge = await _context.Users.FindAsync(userId);
-            if (userToCharge == null)
-                return "Invalid user";
-
-            var orderToAdd = new Order
+            using var transaction = _context.Database.BeginTransaction();
+            try
             {
-                TransactionOwnerId = userId,
-                TransactionStarted = DateTime.Now,
-                Type = orderType,
-                IsBuy = isBuy
-            };
+                var userToCharge = await _context.Users.FindAsync(userId);
+                if (userToCharge == null)
+                    return "Invalid user";
 
-            if (isBuy) {
-                if (userToCharge.UsdBalance - orderValue <= 0)
-                    return "Not enough funds";
-
-                userToCharge.UsdBalance -= orderValue;
-                if (orderType == OrderType.LimitOrder)
+                var orderToAdd = new Order
                 {
+                    TransactionOwnerId = userId,
+                    TransactionStarted = DateTime.Now,
+                    Type = orderType,
+                    IsBuy = isBuy
+                };
+
+                if (isBuy) {
+                    if (userToCharge.UsdBalance - orderValue <= 0)
+                        return "Not enough funds";
+
+                    userToCharge.UsdBalance -= orderValue;
+                    if (orderType == OrderType.LimitOrder)
+                    {
+                        orderToAdd.ValueInBtc = orderValue;
+                        orderToAdd.ValueInUsd = limitValue;
+                    }
+                    else
+                    {
+                        orderToAdd.ValueInUsd = orderValue;
+                        orderToAdd.ValueInBtc = 999999;
+                    }
+
+                    _context.Orders.Add(orderToAdd);
+                    await _context.SaveChangesAsync();
+
+                    var bestSales = await GetBestSellOffers();
+
+                    if (bestSales.Count > 0)
+                    {
+                        for (var i = 0; orderToAdd.FilledValue < orderToAdd.ValueInUsd && i < bestSales.Count; i++)
+                        {
+                            var sellOrder = bestSales.ElementAt(i);
+                            if (sellOrder.ValueInBtc == 0 || sellOrder.ValueInUsd == 0 || (orderType == OrderType.LimitOrder && sellOrder.ValueInUsd / sellOrder.ValueInBtc > orderToAdd.ValueInUsd / orderToAdd.ValueInBtc))
+                                continue;
+
+                            var partialOrderToAdd = new PartialOrder()
+                            {
+                                BuyOrderId = orderToAdd.Id,
+                                SellOrderId = sellOrder.Id,
+                            };
+
+                            var unspentBuyingUsd = orderToAdd.ValueInUsd - orderToAdd.FilledValue;
+                            var unspentBuyingBtc = unspentBuyingUsd / orderToAdd.ValueInUsd * orderToAdd.ValueInBtc;
+                            var unspentSellingUsd = (sellOrder.ValueInBtc - sellOrder.FilledValue) / sellOrder.ValueInBtc * sellOrder.ValueInUsd;
+
+                            if (unspentBuyingUsd == 0 || unspentBuyingBtc == 0 || unspentSellingUsd == 0)
+                                continue;
+
+                            if (unspentBuyingUsd > unspentSellingUsd)
+                            {
+                                partialOrderToAdd.Value = unspentSellingUsd;
+                                orderToAdd.FilledValue += unspentSellingUsd;
+                                userToCharge.BtcBalance += sellOrder.ValueInBtc;
+                                sellOrder.FilledValue = sellOrder.ValueInBtc;
+                                sellOrder.TransactionFinished = DateTime.Now;
+                            } 
+                            else {
+                                partialOrderToAdd.Value = unspentBuyingUsd;
+                                sellOrder.FilledValue += unspentBuyingBtc;
+                                userToCharge.BtcBalance += unspentBuyingBtc;
+                                orderToAdd.FilledValue = orderToAdd.ValueInUsd;
+                                orderToAdd.TransactionFinished = DateTime.Now;
+                            }
+
+                            _context.PartialOrders.Add(partialOrderToAdd);
+                        }
+                    }
+
+                    if (orderType == OrderType.MarketOrder && orderToAdd.FilledValue != orderToAdd.ValueInUsd)
+                    {
+                        _context.Orders.Remove(orderToAdd);
+                        await _context.SaveChangesAsync();
+                        return "Not enough sales to finish market order for set prices";
+                    }
+                } 
+                else if (!isBuy)
+                {
+                    if (userToCharge.BtcBalance - orderValue <= 0)
+                        return "Not enough funds";
+
+                    userToCharge.BtcBalance -= orderValue;
                     orderToAdd.ValueInBtc = orderValue;
-                    orderToAdd.ValueInUsd = limitValue;
-                }
-                else
-                    orderToAdd.ValueInUsd = orderValue;
 
-                _context.Orders.Add(orderToAdd);
-                await _context.SaveChangesAsync();
+                    if (orderType == OrderType.LimitOrder)
+                        orderToAdd.ValueInUsd = limitValue;
+                    else
+                        orderToAdd.ValueInUsd = 999999;
 
-                var bestSales = await GetBestSellOffers();
+                    _context.Orders.Add(orderToAdd);
+                    await _context.SaveChangesAsync();
 
-                if (bestSales.Count > 0)
-                {
-                    for (var i = 0; orderToAdd.FilledValue < orderToAdd.ValueInUsd && i < bestSales.Count; i++)
+                    var bestBuys = await GetBestBuyOffers();
+
+                    if (bestBuys.Count > 0)
                     {
-                        var sellOrder = bestSales.ElementAt(i);
-                        if (sellOrder.ValueInBtc == 0 || sellOrder.ValueInUsd == 0 || (orderType == OrderType.LimitOrder && sellOrder.ValueInUsd / sellOrder.ValueInBtc > orderToAdd.ValueInUsd / orderToAdd.ValueInBtc))
-                            continue;
-
-                        var partialOrderToAdd = new PartialOrder()
+                        for (var i = 0; orderToAdd.FilledValue < orderToAdd.ValueInBtc && i < bestBuys.Count; i++)
                         {
-                            BuyOrderId = orderToAdd.Id,
-                            SellOrderId = sellOrder.Id,
-                        };
+                            var buyOrder = bestBuys.ElementAt(i);
+                            if (buyOrder.ValueInUsd == 0 || buyOrder.ValueInBtc == 0 ||(orderType == OrderType.LimitOrder && buyOrder.ValueInUsd / buyOrder.ValueInBtc < orderToAdd.ValueInUsd / orderToAdd.ValueInBtc))
+                                continue;
+                            var partialOrderToAdd = new PartialOrder()
+                            {
+                                BuyOrderId = buyOrder.Id,
+                                SellOrderId = orderToAdd.Id,
+                            };
 
-                        var unspentBuyingUsd = orderToAdd.ValueInUsd - orderToAdd.FilledValue;
-                        var unspentBuyingBtc = unspentBuyingUsd / orderToAdd.ValueInUsd * orderToAdd.ValueInBtc;
-                        var unspentSellingUsd = (sellOrder.ValueInBtc - sellOrder.FilledValue) / sellOrder.ValueInBtc * sellOrder.ValueInUsd;
+                            var unspentSellingBtc = orderToAdd.ValueInBtc - orderToAdd.FilledValue;
+                            var unspentSellingUsd = unspentSellingBtc / orderToAdd.ValueInBtc * orderToAdd.ValueInUsd;
+                            var unspentBuyingBtc = (buyOrder.ValueInUsd - buyOrder.FilledValue) / buyOrder.ValueInUsd * buyOrder.ValueInBtc;
+                            if (unspentSellingBtc == 0 || unspentSellingUsd == 0 || unspentBuyingBtc == 0)
+                                continue;
 
-                        if (unspentBuyingUsd == 0 || unspentBuyingBtc == 0 || unspentSellingUsd == 0)
-                            continue;
+                                if (unspentSellingBtc > unspentBuyingBtc)
+                            {
+                                partialOrderToAdd.Value = unspentBuyingBtc;
+                                orderToAdd.FilledValue += unspentBuyingBtc;
+                                buyOrder.FilledValue = buyOrder.ValueInUsd;
+                                userToCharge.UsdBalance += buyOrder.ValueInUsd;
+                                buyOrder.TransactionFinished = DateTime.Now;
+                            }
+                            else
+                            {
+                                partialOrderToAdd.Value = unspentSellingBtc;
+                                userToCharge.UsdBalance += unspentSellingUsd;
+                                buyOrder.FilledValue += unspentSellingUsd;
+                                orderToAdd.FilledValue = orderToAdd.ValueInBtc;
+                                orderToAdd.TransactionFinished = DateTime.Now;
+                            }
 
-                        if (unspentBuyingUsd > unspentSellingUsd)
-                        {
-                            partialOrderToAdd.Value = unspentSellingUsd;
-                            orderToAdd.FilledValue += unspentSellingUsd;
-                            sellOrder.FilledValue = sellOrder.ValueInBtc;
-                            sellOrder.TransactionFinished = DateTime.Now;
-                        } 
-                        else {
-                            partialOrderToAdd.Value = unspentBuyingUsd;
-                            sellOrder.FilledValue += unspentBuyingBtc; 
-                            orderToAdd.FilledValue = orderToAdd.ValueInUsd;
-                            orderToAdd.TransactionFinished = DateTime.Now;
+                            _context.PartialOrders.Add(partialOrderToAdd);
                         }
+                    }
 
-                        _context.PartialOrders.Add(partialOrderToAdd);
+                    if (orderType == OrderType.MarketOrder && orderToAdd.FilledValue != orderToAdd.ValueInBtc)
+                    {
+                        _context.Orders.Remove(orderToAdd);
+                        await _context.SaveChangesAsync();
+                        return "Not enough buys to finish market order for set prices";
                     }
                 }
 
-                if (orderType == OrderType.MarketOrder && orderToAdd.FilledValue != orderToAdd.ValueInUsd)
-                {
-                    _context.Orders.Remove(orderToAdd);
-                    await _context.SaveChangesAsync();
-                    return "Not enough sales to finish market order for set prices";
-                }
-            } 
-            else if (!isBuy)
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch (Exception ex)
             {
-                if (userToCharge.BtcBalance - orderValue <= 0)
-                    return "Not enough funds";
+                transaction.Rollback();
 
-                userToCharge.BtcBalance -= orderValue;
-                orderToAdd.ValueInBtc = orderValue;
-
-                if (orderType == OrderType.LimitOrder)
-                    orderToAdd.ValueInUsd = limitValue;
-
-                _context.Orders.Add(orderToAdd);
-                await _context.SaveChangesAsync();
-
-                var bestBuys = await GetBestBuyOffers();
-
-                if (bestBuys.Count > 0)
-                {
-                    for (var i = 0; orderToAdd.FilledValue < orderToAdd.ValueInBtc && i < bestBuys.Count; i++)
-                    {
-                        var buyOrder = bestBuys.ElementAt(i);
-                        if (buyOrder.ValueInUsd == 0 || buyOrder.ValueInBtc == 0 ||(orderType == OrderType.LimitOrder && buyOrder.ValueInUsd / buyOrder.ValueInBtc < orderToAdd.ValueInUsd / orderToAdd.ValueInBtc))
-                            continue;
-                        var partialOrderToAdd = new PartialOrder()
-                        {
-                            BuyOrderId = buyOrder.Id,
-                            SellOrderId = orderToAdd.Id,
-                        };
-
-                        var unspentSellingBtc = orderToAdd.ValueInBtc - orderToAdd.FilledValue;
-                        var unspentSellingUsd = unspentSellingBtc / orderToAdd.ValueInBtc * orderToAdd.ValueInUsd;
-                        var unspentBuyingBtc = (buyOrder.ValueInUsd - buyOrder.FilledValue) / buyOrder.ValueInUsd * buyOrder.ValueInBtc;
-                        if (unspentSellingBtc == 0 || unspentSellingUsd == 0 || unspentBuyingBtc == 0)
-                            continue;
-
-                        if (unspentSellingBtc > unspentBuyingBtc)
-                        {
-                            partialOrderToAdd.Value = unspentBuyingBtc;
-                            orderToAdd.FilledValue += unspentBuyingBtc;
-                            buyOrder.FilledValue = buyOrder.ValueInUsd;
-                            buyOrder.TransactionFinished = DateTime.Now;
-                        }
-                        else
-                        {
-                            partialOrderToAdd.Value = unspentSellingBtc;
-                            buyOrder.FilledValue += unspentSellingUsd;
-                            orderToAdd.FilledValue = orderToAdd.ValueInBtc;
-                            orderToAdd.TransactionFinished = DateTime.Now;
-                        }
-
-                        _context.PartialOrders.Add(partialOrderToAdd);
-                    }
-                }
-
-                if (orderType == OrderType.MarketOrder && orderToAdd.FilledValue != orderToAdd.ValueInBtc)
-                {
-                    _context.Orders.Remove(orderToAdd);
-                    await _context.SaveChangesAsync();
-                    return "Not enough buys to finish market order for set prices";
-                }
+                Console.WriteLine(ex.InnerException);
             }
 
-            await _context.SaveChangesAsync();
             return "";
         }
 
@@ -254,7 +275,7 @@ namespace BitcoinMarket.Repositories.Implementations
         {
             var orders = await _context.Orders.Where(t => t.TransactionFinished != null && !t.IsCancelled).OrderBy(t => t.TransactionFinished).ToListAsync();
             var chartPoints = new List<ChartPoint>();
-            var chartPoint = new ChartPoint();
+            var chartPoint = new ChartPoint(); 
             var previousOrder = orders[0];
 
             foreach(var order in orders)

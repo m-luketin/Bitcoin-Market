@@ -80,13 +80,13 @@ const Offers = ({ value, hackyRerenderVariable }) => {
 					<div className="buys-header-container">
 						<span className="buys-header-item">Date</span>
 						<span className="buys-header-item">Time</span>
-						<span className="buys-header-item">Bid(USD)</span>
 						<span className="buys-header-item">Sum</span>
+						<span className="buys-header-item">Bid(USD)</span>
 						<span className="buys-header-item">Ask($)</span>
 					</div>
 				</div>
 				<div className="buys-container">
-					{buys?.length &&
+					{!!buys?.length &&
 						buys.map((buy, index) => {
 							return (
 								<SingleOrder
@@ -116,7 +116,7 @@ const Offers = ({ value, hackyRerenderVariable }) => {
 					</div>
 				</div>
 				<div className="sales-container">
-					{sales?.length &&
+					{!!sales?.length &&
 						sales.map((sale, index) => {
 							return (
 								<SingleOrder

@@ -269,7 +269,7 @@ const UserModal = ({
 								</div>
 							</div>
 							<div className="user-active-orders-container">
-								{activeOrders?.length &&
+								{!!activeOrders?.length &&
 									activeOrders
 										.filter((ao) => ao.isBuy)
 										.map((order, index) => {
@@ -303,7 +303,7 @@ const UserModal = ({
 								</div>
 							</div>
 							<div className="user-active-orders-container">
-								{activeOrders?.length &&
+								{!!activeOrders?.length &&
 									activeOrders
 										.filter((ao) => !ao.isBuy)
 										.map((order, index) => {
@@ -339,7 +339,7 @@ const UserModal = ({
 								</div>
 							</div>
 							<div className="user-finished-orders-container">
-								{finishedOrders?.length &&
+								{!!finishedOrders?.length &&
 									finishedOrders.map((order, index) => {
 										return (
 											<SingleOrder
